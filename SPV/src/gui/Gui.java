@@ -5,12 +5,17 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import jssc.SerialPortException;
+import serial.Port;
+import serial.PortCom;
+import serial.PortSim;
 import settings.Config;
 import version.Version;
-import violin.Violin;
 
 /**
  * This shows the general user interface and also includes various functions
@@ -21,12 +26,14 @@ public class Gui extends javax.swing.JFrame
 {
 
     private static final ImageIcon IMAGE_LOGO = new ImageIcon(Config.getInstance().getClass().getResource("/icons/violin128.png"));
+    private static final ImageIcon IMAGE_BOX_CHECKED = new ImageIcon(Config.getInstance().getClass().getResource("/icons/check16.png"));
+    private static final ImageIcon IMAGE_BOX_UNCHECKED = new ImageIcon(Config.getInstance().getClass().getResource("/icons/checkbox16.png"));
 
     private final Settings settings;
     private final Config CONFIG;
     private final PropertyChangeListener configChangeListener;
 
-    private Violin violin;
+    private Port port;
 
     /**
      * Creates the GUI
@@ -53,10 +60,12 @@ public class Gui extends javax.swing.JFrame
         super.setExtendedState(CONFIG.getWindowMode());
 
         super.setIconImage(IMAGE_LOGO.getImage());
-
         super.setLocation(CONFIG.getWindowLocation());
 
-        enableNoteButtons(false);
+        port = new PortCom();
+        //port = new PortSim();
+
+        port.setAvailablePorts(serialComboBox);
 
         //super.setLocationRelativeTo(null);
         System.out.println("Start Application SPV v" + Version.getVERSION());
@@ -70,10 +79,10 @@ public class Gui extends javax.swing.JFrame
 
         mainPanel = new javax.swing.JPanel();
         toolBar = new javax.swing.JToolBar();
-        violinButton = new javax.swing.JButton();
-        noteButtonA = new javax.swing.JButton();
-        noteButtonB = new javax.swing.JButton();
-        noteButtonC = new javax.swing.JButton();
+        playButton = new javax.swing.JButton();
+        serialComboBox = new javax.swing.JComboBox<>();
+        serialRefreshButton = new javax.swing.JButton();
+        serialConnectButton = new javax.swing.JButton();
         jMenuBar = new javax.swing.JMenuBar();
         jFile = new javax.swing.JMenu();
         jMenuOpen = new javax.swing.JMenuItem();
@@ -90,84 +99,53 @@ public class Gui extends javax.swing.JFrame
 
         toolBar.setRollover(true);
 
-        violinButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/violin32.png"))); // NOI18N
-        violinButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(1, 2, 1, 2), javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED)));
-        violinButton.setFocusable(false);
-        violinButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        violinButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        violinButton.addActionListener(new java.awt.event.ActionListener()
+        playButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/violin32.png"))); // NOI18N
+        playButton.setText("Play");
+        playButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(1, 2, 1, 2), javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED)));
+        playButton.setFocusable(false);
+        playButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        playButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        playButton.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                violinButtonActionPerformed(evt);
+                playButtonActionPerformed(evt);
             }
         });
-        toolBar.add(violinButton);
+        toolBar.add(playButton);
 
-        noteButtonA.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
-        noteButtonA.setText("A");
-        noteButtonA.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(1, 2, 1, 2), javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED)));
-        noteButtonA.setFocusable(false);
-        noteButtonA.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        noteButtonA.setMaximumSize(new java.awt.Dimension(39, 39));
-        noteButtonA.setMinimumSize(new java.awt.Dimension(39, 39));
-        noteButtonA.setPreferredSize(new java.awt.Dimension(39, 39));
-        noteButtonA.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        noteButtonA.addMouseListener(new java.awt.event.MouseAdapter()
-        {
-            public void mousePressed(java.awt.event.MouseEvent evt)
-            {
-                noteButtonAMousePressed(evt);
-            }
-            public void mouseReleased(java.awt.event.MouseEvent evt)
-            {
-                noteButtonAMouseReleased(evt);
-            }
-        });
-        noteButtonA.addActionListener(new java.awt.event.ActionListener()
-        {
-            public void actionPerformed(java.awt.event.ActionEvent evt)
-            {
-                noteButtonAActionPerformed(evt);
-            }
-        });
-        toolBar.add(noteButtonA);
+        serialComboBox.setMaximumRowCount(15);
+        serialComboBox.setMaximumSize(new java.awt.Dimension(70, 20));
+        toolBar.add(serialComboBox);
 
-        noteButtonB.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
-        noteButtonB.setText("B");
-        noteButtonB.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(1, 2, 1, 2), javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED)));
-        noteButtonB.setFocusable(false);
-        noteButtonB.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        noteButtonB.setMaximumSize(new java.awt.Dimension(39, 39));
-        noteButtonB.setMinimumSize(new java.awt.Dimension(39, 39));
-        noteButtonB.setPreferredSize(new java.awt.Dimension(39, 39));
-        noteButtonB.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        noteButtonB.addActionListener(new java.awt.event.ActionListener()
+        serialRefreshButton.setText("Refresh");
+        serialRefreshButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(1, 2, 1, 2), javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED)));
+        serialRefreshButton.setFocusable(false);
+        serialRefreshButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        serialRefreshButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        serialRefreshButton.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                noteButtonBActionPerformed(evt);
+                serialRefreshButtonActionPerformed(evt);
             }
         });
-        toolBar.add(noteButtonB);
+        toolBar.add(serialRefreshButton);
 
-        noteButtonC.setFont(new java.awt.Font("Tahoma", 0, 36)); // NOI18N
-        noteButtonC.setText("C");
-        noteButtonC.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(1, 2, 1, 2), javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED)));
-        noteButtonC.setFocusable(false);
-        noteButtonC.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        noteButtonC.setMaximumSize(new java.awt.Dimension(39, 39));
-        noteButtonC.setMinimumSize(new java.awt.Dimension(39, 39));
-        noteButtonC.setPreferredSize(new java.awt.Dimension(39, 39));
-        noteButtonC.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        noteButtonC.addActionListener(new java.awt.event.ActionListener()
+        serialConnectButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/checkbox16.png"))); // NOI18N
+        serialConnectButton.setText("Connect");
+        serialConnectButton.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(1, 2, 1, 2), javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED)));
+        serialConnectButton.setFocusable(false);
+        serialConnectButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        serialConnectButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        serialConnectButton.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                noteButtonCActionPerformed(evt);
+                serialConnectButtonActionPerformed(evt);
             }
         });
-        toolBar.add(noteButtonC);
+        toolBar.add(serialConnectButton);
 
         mainPanel.add(toolBar, java.awt.BorderLayout.NORTH);
 
@@ -257,38 +235,45 @@ public class Gui extends javax.swing.JFrame
       openFile();
   }//GEN-LAST:event_jMenuOpenActionPerformed
 
-    private void noteButtonAActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_noteButtonAActionPerformed
-    {//GEN-HEADEREND:event_noteButtonAActionPerformed
+    private void playButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_playButtonActionPerformed
+    {//GEN-HEADEREND:event_playButtonActionPerformed
 
-    }//GEN-LAST:event_noteButtonAActionPerformed
+    }//GEN-LAST:event_playButtonActionPerformed
 
-    private void violinButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_violinButtonActionPerformed
-    {//GEN-HEADEREND:event_violinButtonActionPerformed
-        violin = new Violin("COM11");
-        enableNoteButtons(true);
-    }//GEN-LAST:event_violinButtonActionPerformed
+    private void serialConnectButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_serialConnectButtonActionPerformed
+    {//GEN-HEADEREND:event_serialConnectButtonActionPerformed
+        if(port.isOpen())
+        {
+            // try to close
+            try
+            {
+                port.closePort();
+                serialConnectButton.setIcon(IMAGE_BOX_UNCHECKED);
+            }
+            catch (SerialPortException ex)
+            {
+                Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else
+        {
+            // try to open
+            try
+            {
+                port.openPort(serialComboBox.getSelectedItem().toString());
+                serialConnectButton.setIcon(IMAGE_BOX_CHECKED);
+            }
+            catch (SerialPortException ex)
+            {
+                Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_serialConnectButtonActionPerformed
 
-    private void noteButtonBActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_noteButtonBActionPerformed
-    {//GEN-HEADEREND:event_noteButtonBActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_noteButtonBActionPerformed
-
-    private void noteButtonCActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_noteButtonCActionPerformed
-    {//GEN-HEADEREND:event_noteButtonCActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_noteButtonCActionPerformed
-
-    private void noteButtonAMousePressed(java.awt.event.MouseEvent evt)//GEN-FIRST:event_noteButtonAMousePressed
-    {//GEN-HEADEREND:event_noteButtonAMousePressed
-        //System.out.println("BUTTON A PRESSED");
-        violin.startNote(violin.A);
-    }//GEN-LAST:event_noteButtonAMousePressed
-
-    private void noteButtonAMouseReleased(java.awt.event.MouseEvent evt)//GEN-FIRST:event_noteButtonAMouseReleased
-    {//GEN-HEADEREND:event_noteButtonAMouseReleased
-        //System.out.println("BUTTON A RELEASED");
-        violin.stopNote(violin.A);
-    }//GEN-LAST:event_noteButtonAMouseReleased
+    private void serialRefreshButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_serialRefreshButtonActionPerformed
+    {//GEN-HEADEREND:event_serialRefreshButtonActionPerformed
+        port.setAvailablePorts(serialComboBox);
+    }//GEN-LAST:event_serialRefreshButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -317,8 +302,7 @@ public class Gui extends javax.swing.JFrame
             java.util.logging.Logger.getLogger(Gui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
-        java.awt.EventQueue.invokeLater(
-                () ->
+        java.awt.EventQueue.invokeLater(() ->
         {
             try
             {
@@ -346,11 +330,11 @@ public class Gui extends javax.swing.JFrame
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPanel mainPanel;
-    private javax.swing.JButton noteButtonA;
-    private javax.swing.JButton noteButtonB;
-    private javax.swing.JButton noteButtonC;
+    private javax.swing.JButton playButton;
+    private javax.swing.JComboBox<String> serialComboBox;
+    private javax.swing.JButton serialConnectButton;
+    private javax.swing.JButton serialRefreshButton;
     private javax.swing.JToolBar toolBar;
-    private javax.swing.JButton violinButton;
     // End of variables declaration//GEN-END:variables
 
 
@@ -411,13 +395,6 @@ public class Gui extends javax.swing.JFrame
     {
         super.setVisible(b);
         //startProgSet();   // for fast debugging
-    }
-
-    private void enableNoteButtons(boolean enable)
-    {
-        noteButtonA.setEnabled(enable);
-        noteButtonB.setEnabled(enable);
-        noteButtonC.setEnabled(enable);
     }
 
     private void openFile()

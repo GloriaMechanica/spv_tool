@@ -1,5 +1,7 @@
+
 package serial;
 
+import javax.swing.JComboBox;
 import jssc.*;
 
 /**
@@ -9,64 +11,83 @@ import jssc.*;
 public class PortCom implements Port
 {
 
-    private SerialPort port;
+    private SerialPort port = null;
 
-    private static final int DEFAULT_DATABITS = SerialPort.DATABITS_8;
-    private static final int DEFAULT_STOPBITS = SerialPort.STOPBITS_1;
-    private static final int DEFAULT_PARITY = SerialPort.PARITY_NONE;
-    private static final int DEFAULT_BAUDRATE = 31250;   // baudrate of MIDI
-
-    /**
-     * @brief Default Baudrate is 31250 Default Databits is 8 Default Stopbits is 1 Default Parity is none
-     *
-     * @param port COM0, COM1, ...
-     *
-     * @throws jssc.SerialPortException
-     */
-    public PortCom(String port) throws SerialPortException
+    public PortCom()
     {
-        this.port = new SerialPort(port);
     }
 
     /**
-     * @brief If port busy TYPE_PORT_BUSY exception will be thrown. If port not found TYPE_PORT_NOT_FOUND exception will be thrown.
+     * @brief If port busy TYPE_PORT_BUSY exception will be thrown. If port not found
+     * TYPE_PORT_NOT_FOUND exception will be thrown.
+     *
+     * @param portName COM1, COM2, ...
      *
      * @throws SerialPortException
      */
     @Override
-    public void openPort() throws SerialPortException
+    public void openPort(String portName) throws SerialPortException
     {
+        closePort();   // only closes the port if it is actually open
+        port = new SerialPort(portName);
+        port.setParams(Port.DEFAULT_BAUDRATE, Port.DEFAULT_DATABITS, Port.DEFAULT_STOPBITS, Port.DEFAULT_PARITY);
         port.openPort();
     }
 
     @Override
     public void closePort() throws SerialPortException
     {
-        port.closePort();
+        if(port != null && port.isOpened())
+            port.closePort();
+
     }
 
     @Override
-    public void sendString(String str) throws SerialPortException
+    public void writeString(String str) throws SerialPortException
     {
-        port.writeString(str);
+        if(port != null && port.isOpened())
+        {
+            port.writeString(str);
+        }
     }
 
     @Override
-    public void sendBytes(byte[] bytes) throws SerialPortException
+    public void writeBytes(byte[] bytes) throws SerialPortException
     {
-        port.writeBytes(bytes);
+        if(port != null && port.isOpened())
+        {
+            port.writeBytes(bytes);
+        }
     }
 
     @Override
-    public void sendByte(byte singleByte) throws SerialPortException
+    public void writeByte(byte singleByte) throws SerialPortException
     {
-        port.writeByte(singleByte);
+        if(port != null && port.isOpened())
+        {
+            port.writeByte(singleByte);
+        }
     }
 
     @Override
-    public void setDefaultParams() throws SerialPortException
+    public void setAvailablePorts(JComboBox<String> comboBox)
     {
-        port.setParams(DEFAULT_BAUDRATE, DEFAULT_DATABITS, DEFAULT_STOPBITS, DEFAULT_PARITY);
+        String[] portNames = SerialPortList.getPortNames();
+
+        comboBox.removeAllItems();
+        for(String portName : portNames)
+        {
+            comboBox.addItem(portName);
+        }
+    }
+
+    @Override
+    public boolean isOpen()
+    {
+        if(port != null)
+            return port.isOpened();
+        else
+            return false;
     }
 
 }

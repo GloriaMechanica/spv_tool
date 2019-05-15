@@ -1,8 +1,5 @@
 package midi;
 
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jssc.SerialPortException;
 import serial.Port;
 import serial.PortCom;
@@ -50,12 +47,11 @@ Command	Meaning	# parameters	param 1	param 2
         try
         {
             if(simulate)
-                this.port = new PortSim(port);
+                this.port = new PortSim();
             else
-                this.port = new PortCom(port);
+                this.port = new PortCom();
 
-            this.port.openPort();
-            this.port.setDefaultParams();
+            this.port.openPort(port);
         }
         catch (SerialPortException ex)
         {
@@ -69,7 +65,7 @@ Command	Meaning	# parameters	param 1	param 2
         try
         {
             byte[] cmd = buildCommand(CMD_NOTE_ON, note.getKey(), note.getVelocity());
-            port.sendBytes(cmd);
+            port.writeBytes(cmd);
             printCommand(cmd);
         }
         catch (SerialPortException ex)
@@ -83,7 +79,7 @@ Command	Meaning	# parameters	param 1	param 2
         try
         {
             byte[] cmd = buildCommand(CMD_NOTE_OFF, note.getKey(), note.getVelocity());
-            port.sendBytes(cmd);
+            port.writeBytes(cmd);
             printCommand(cmd);
         }
         catch (SerialPortException ex)

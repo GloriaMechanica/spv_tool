@@ -1,5 +1,7 @@
+
 package serial;
 
+import javax.swing.JComboBox;
 import jssc.*;
 
 /**
@@ -9,45 +11,65 @@ import jssc.*;
 public class PortSim implements Port
 {
 
-    public PortSim(String port)
+    private boolean open = false;
+
+    public PortSim()
     {
         //throw new UnsupportedOperationException("PortSim.PortSim not implemented");
     }
 
     @Override
-    public void openPort() throws SerialPortException
+    public void openPort(String portName) throws SerialPortException
     {
+        open = true;
         //throw new UnsupportedOperationException("PortSim.openPort not implemented");
     }
 
     @Override
     public void closePort() throws SerialPortException
     {
+        open = false;
         //throw new UnsupportedOperationException("PortSim.closePort not implemented");
     }
 
     @Override
-    public void sendString(String str) throws SerialPortException
+    public void writeString(String str) throws SerialPortException
     {
         //throw new UnsupportedOperationException("PortSim.sendString not implemented");
     }
 
     @Override
-    public void sendBytes(byte[] bytes) throws SerialPortException
+    public void writeBytes(byte[] bytes) throws SerialPortException
     {
         //throw new UnsupportedOperationException("PortSim.sendBytes not implemented");
     }
 
     @Override
-    public void sendByte(byte singleBytes) throws SerialPortException
+    public void writeByte(byte singleBytes) throws SerialPortException
     {
         //throw new UnsupportedOperationException("PortSim.sendBytes not implemented");
     }
 
     @Override
-    public void setDefaultParams() throws SerialPortException
+    public void setAvailablePorts(JComboBox<String> comboBox)
     {
-        //throw new UnsupportedOperationException("PortSim.setDefaultParams not implemented");
+        String[] portNames =
+        {
+            "COM1", "COM2", "COM20"
+        };
+
+        comboBox.removeAllItems();
+        for(String portName : portNames)
+        {
+            comboBox.addItem(portName);
+        }
+    }
+
+    @Override
+    public boolean isOpen()
+    {
+        //throw new UnsupportedOperationException("PortSim.isOpen not implemented");
+        return open;
     }
 
 }
