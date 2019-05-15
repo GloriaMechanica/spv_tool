@@ -1,3 +1,4 @@
+
 package gui;
 
 import java.awt.Dimension;
@@ -54,11 +55,10 @@ public class Gui extends javax.swing.JFrame
         super.setIconImage(IMAGE_LOGO.getImage());
 
         super.setLocation(CONFIG.getWindowLocation());
-        
-        enableNoteButtons(false);
-        
-        //super.setLocationRelativeTo(null);
 
+        enableNoteButtons(false);
+
+        //super.setLocationRelativeTo(null);
         System.out.println("Start Application SPV v" + Version.getVERSION());
 
     }
@@ -295,39 +295,30 @@ public class Gui extends javax.swing.JFrame
      */
     public static void main(String args[])
     {
-        /*
-     * Set the Nimbus look and feel
-         */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /*
-     * If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel. For details see
-     * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
+
+        final boolean useDefaultLookAndFeel = false;
+
+        String lookAndFeelClassName;
+        if(useDefaultLookAndFeel)
+        {
+            lookAndFeelClassName = javax.swing.UIManager.getCrossPlatformLookAndFeelClassName();
+        }
+        else
+        {
+            lookAndFeelClassName = javax.swing.UIManager.getSystemLookAndFeelClassName();
+        }
+
         try
         {
-//      for(javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
-//      {
-//        if("Nimbus".equals(info.getName()))
-//        {
-//          javax.swing.UIManager.setLookAndFeel(info.getClassName());
-//          
-//          break;
-//        }
-//      }
-
-            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+            javax.swing.UIManager.setLookAndFeel(lookAndFeelClassName);
         }
         catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex)
         {
             java.util.logging.Logger.getLogger(Gui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
 
-        //</editor-fold>
-        /*
-     * Create and display the form
-         */
-        java.awt.EventQueue.invokeLater(() ->
+        java.awt.EventQueue.invokeLater(
+                () ->
         {
             try
             {
@@ -339,7 +330,8 @@ public class Gui extends javax.swing.JFrame
                 JOptionPane.showMessageDialog(new JFrame(), ex.toString());
                 System.exit(0);
             }
-        });
+        }
+        );
 
     }
 
@@ -404,7 +396,8 @@ public class Gui extends javax.swing.JFrame
    * ---PRIVATE METHODS----------------------------------------
      */
     /**
-     * Opens up the ProgSetDialog and saves the changes values. If the measurement is already done the datasets will be updated.
+     * Opens up the ProgSetDialog and saves the changes values. If the measurement is
+     * already done the datasets will be updated.
      */
     private void startProgSet()
     {
