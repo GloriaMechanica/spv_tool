@@ -13,7 +13,7 @@
 ]>
 
 
-<project name="SPV_UI" default="default" basedir=".">
+<project name="SPV_Tool" default="default" basedir=".">
     <description>Builds, tests, and runs the project SPV_UI.</description>
     
     <import file="nbproject/build-impl.xml"/>
@@ -85,7 +85,7 @@
     
     &version;
     
-    <jar jarfile="dist/SPV_UI_${version}.jar">
+      <jar jarfile="dist/SPV_Tool_${version}.jar">
       
       <zipfileset src="${dist.jar}" excludes="META-INF/*"/>
       <zipfileset src="../lib/jssc-2.8.0.jar" excludes="META-INF/*"/>
@@ -97,18 +97,18 @@
 	
     </jar>
     
-    <delete file="dist/SPV_UI.jar" />
-    <copy file="dist/SPV_UI_${version}.jar" tofile="dist/SPV_UI.jar" />
-    <move file="dist/SPV_UI_${version}.jar" todir="../bin" />
+    <delete file="dist/SPV_Tool.jar" />
+    <copy file="dist/SPV_Tool_${version}.jar" tofile="dist/SPV_Tool.jar" />
+    <move file="dist/SPV_Tool_${version}.jar" todir="../bin" />
     
-	<echo message="delete and copy done. [ dist/SPV_UI_${version}.jar ]" level="info"/>
+    <echo message="delete and copy done. [ dist/SPV_Tool_${version}.jar ]" level="info"/>
     
   </target>
     
     
   <target depends="init,compile,jar" description="Run a main class." name="run">
     
-    <java jar="dist/SPV_UI.jar">
+      <java jar="dist/SPV_Tool.jar">
       <arg value="${application.args}"/>
     </java>
   </target>
